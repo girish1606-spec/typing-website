@@ -1,3 +1,6 @@
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -14,6 +17,9 @@ import developerRoutes from './routes/developerRoutes.js';
 
 dotenv.config();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 const APP_ORIGIN = process.env.APP_ORIGIN || 'http://localhost:5173';
@@ -22,6 +28,7 @@ const APP_ORIGIN = process.env.APP_ORIGIN || 'http://localhost:5173';
 // Security & Utility Middlewares
 // -------------------------------------------------------------
 app.use(helmet({
+  contentSecurityPolicy: false,
   crossOriginResourcePolicy: { policy: 'cross-origin' }
 }));
 
@@ -65,7 +72,19 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// 404 Route handler
+// -------------------------------------------------------------
+// Serve Frontend Client in Production (Single Web Service on Render)
+// -------------------------------------------------------------
+const clientDistPath = path.join(__dirname, '..', 'client', 'dist');
+if (fs.existsSync(clientDistPath)) {
+  app.use(express.static(clientDistPath));
+  app.get('*', (req, res, next) => {
+    if (req.originalUrl.startsWith('/api')) return next();
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+}
+
+// 404 Route handler for unhandled API routes
 app.use((req, res) => {
   res.status(404).json({
     success: false,
