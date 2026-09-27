@@ -3,14 +3,34 @@ import { api } from '../services/api.js';
 
 const AuthContext = createContext(null);
 
+const safeStorage = {
+  getItem: (key) => {
+    try {
+      return typeof window !== 'undefined' ? localStorage.getItem(key) : null;
+    } catch {
+      return null;
+    }
+  },
+  setItem: (key, val) => {
+    try {
+      if (typeof window !== 'undefined') localStorage.setItem(key, val);
+    } catch {}
+  },
+  removeItem: (key) => {
+    try {
+      if (typeof window !== 'undefined') localStorage.removeItem(key);
+    } catch {}
+  }
+};
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(() => localStorage.getItem('typespeed_token') || null);
+  const [token, setToken] = useState(() => safeStorage.getItem('typespeed_token') || null);
   const [loading, setLoading] = useState(true);
 
   // Initialize auth state from stored token
   const refreshProfile = useCallback(async () => {
-    const storedToken = localStorage.getItem('typespeed_token');
+    const storedToken = safeStorage.getItem('typespeed_token');
     if (!storedToken) {
       setUser(null);
       setLoading(false);
@@ -22,11 +42,11 @@ export function AuthProvider({ children }) {
       if (res && res.success && res.user) {
         setUser(res.user);
       } else {
-        localStorage.removeItem('typespeed_token');
+        safeStorage.removeItem('typespeed_token');
         setUser(null);
       }
     } catch {
-      localStorage.removeItem('typespeed_token');
+      safeStorage.removeItem('typespeed_token');
       setUser(null);
     } finally {
       setLoading(false);
@@ -38,9 +58,9 @@ export function AuthProvider({ children }) {
   }, [refreshProfile]);
 
   const login = async (email, password) => {
-    const res = await api.login({ email, password });
+    const res = await api.login(email, password);
     if (res && res.token && res.user) {
-      localStorage.setItem('typespeed_token', res.token);
+      safeStorage.setItem('typespeed_token', res.token);
       setToken(res.token);
       setUser(res.user);
     }
@@ -48,9 +68,9 @@ export function AuthProvider({ children }) {
   };
 
   const developerLogin = async (email, password) => {
-    const res = await api.developerLogin({ email, password });
+    const res = await api.developerLogin(email, password);
     if (res && res.token && res.user) {
-      localStorage.setItem('typespeed_token', res.token);
+      safeStorage.setItem('typespeed_token', res.token);
       setToken(res.token);
       setUser(res.user);
     }
@@ -60,7 +80,7 @@ export function AuthProvider({ children }) {
   const developerRegister = async (devData) => {
     const res = await api.developerRegister(devData);
     if (res && res.token && res.user) {
-      localStorage.setItem('typespeed_token', res.token);
+      safeStorage.setItem('typespeed_token', res.token);
       setToken(res.token);
       setUser(res.user);
     }
@@ -70,7 +90,7 @@ export function AuthProvider({ children }) {
   const register = async (userData) => {
     const res = await api.register(userData);
     if (res && res.token && res.user) {
-      localStorage.setItem('typespeed_token', res.token);
+      safeStorage.setItem('typespeed_token', res.token);
       setToken(res.token);
       setUser(res.user);
     }
@@ -78,7 +98,7 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
-    localStorage.removeItem('typespeed_token');
+    safeStorage.removeItem('typespeed_token');
     setToken(null);
     setUser(null);
   };

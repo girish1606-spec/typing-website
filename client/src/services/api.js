@@ -1,12 +1,27 @@
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+const getApiBase = () => {
+  if (import.meta.env.VITE_API_URL) {
+    const url = import.meta.env.VITE_API_URL.replace(/\/+$/, '');
+    return url.endsWith('/api') ? url : `${url}/api`;
+  }
+  return '/api';
+};
+
+const API_BASE = getApiBase();
 
 /**
- * Universal API request wrapper
+ * Universal API request wrapper with mobile fallback
  */
 async function request(endpoint, options = {}) {
-  const token = localStorage.getItem('typespeed_token');
+  let token = null;
+  try {
+    token = localStorage.getItem('typespeed_token');
+  } catch {
+    token = null;
+  }
+
   const headers = {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
     ...(token && { Authorization: `Bearer ${token}` }),
     ...options.headers,
   };
@@ -16,12 +31,18 @@ async function request(endpoint, options = {}) {
     headers,
   };
 
-  if (options.body && typeof options.body === 'object') {
-    config.body = JSON.stringify(options.body);
+  if (options.body) {
+    if (typeof options.body === 'object') {
+      config.body = JSON.stringify(options.body);
+    } else {
+      config.body = options.body;
+    }
   }
 
+  const targetUrl = `${API_BASE}${endpoint}`;
+
   try {
-    const res = await fetch(`${API_BASE}${endpoint}`, config);
+    const res = await fetch(targetUrl, config);
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok) {
@@ -30,8 +51,32 @@ async function request(endpoint, options = {}) {
 
     return data;
   } catch (error) {
-    if (error.name === 'TypeError' || error.message.includes('fetch') || error.message.includes('NetworkError')) {
-      throw new Error('Unable to connect to TYPE SPEED server. Please ensure the backend is running.');
+    // If mobile testing on LAN (e.g. 192.168.x.x:5173), retry directly to port 5000 if proxy failed
+    if (
+      typeof window !== 'undefined' &&
+      window.location.port === '5173' &&
+      window.location.hostname !== 'localhost' &&
+      window.location.hostname !== '127.0.0.1' &&
+      !targetUrl.includes(':5000')
+    ) {
+      try {
+        const directUrl = `http://${window.location.hostname}:5000/api${endpoint}`;
+        const retryRes = await fetch(directUrl, config);
+        const retryData = await retryRes.json().catch(() => ({}));
+        if (!retryRes.ok) {
+          throw new Error(retryData.message || `Request failed with status ${retryRes.status}`);
+        }
+        return retryData;
+      } catch {}
+    }
+
+    if (
+      error.name === 'TypeError' ||
+      error.message.includes('fetch') ||
+      error.message.includes('NetworkError') ||
+      error.message.includes('network')
+    ) {
+      throw new Error('Connection to server failed. Please ensure the backend is running and network is connected.');
     }
     throw error;
   }
@@ -39,9 +84,38 @@ async function request(endpoint, options = {}) {
 
 export const api = {
   // Authentication
-  register: (payload) => request('/auth/register', { method: 'POST', body: payload }),
-  login: (payload) => request('/auth/login', { method: 'POST', body: payload }),
-  developerLogin: (payload) => request('/auth/developer/login', { method: 'POST', body: payload }),
+  register: (payloadOrName, email, password, confirmPassword) => {
+    let body;
+    if (typeof payloadOrName === 'object' && payloadOrName !== null) {
+      body = payloadOrName;
+    } else {
+      body = {
+        name: payloadOrName,
+        email,
+        password,
+        confirmPassword: confirmPassword || password,
+      };
+    }
+    return request('/auth/register', { method: 'POST', body });
+  },
+  login: (payloadOrEmail, password) => {
+    let body;
+    if (typeof payloadOrEmail === 'object' && payloadOrEmail !== null) {
+      body = payloadOrEmail;
+    } else {
+      body = { email: payloadOrEmail, password };
+    }
+    return request('/auth/login', { method: 'POST', body });
+  },
+  developerLogin: (payloadOrEmail, password) => {
+    let body;
+    if (typeof payloadOrEmail === 'object' && payloadOrEmail !== null) {
+      body = payloadOrEmail;
+    } else {
+      body = { email: payloadOrEmail, password };
+    }
+    return request('/auth/developer/login', { method: 'POST', body });
+  },
   developerRegister: (payload) => request('/auth/developer/register', { method: 'POST', body: payload }),
   forgotPassword: (payload) => request('/auth/forgot-password', { method: 'POST', body: payload }),
   resetPassword: (payload) => request('/auth/reset-password', { method: 'POST', body: payload }),

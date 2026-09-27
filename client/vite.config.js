@@ -6,12 +6,13 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    host: true,
+    host: '0.0.0.0', // Listen on all network interfaces for mobile phone access
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://127.0.0.1:5000',
         changeOrigin: true,
         secure: false,
+        ws: true,
       }
     }
   }

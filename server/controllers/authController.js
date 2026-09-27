@@ -16,12 +16,16 @@ function sanitizeUser(user) {
  */
 export async function register(req, res) {
   try {
-    const { name, email, password, confirmPassword } = req.body;
+    let { name, email, password, confirmPassword } = req.body || {};
 
-    if (!name || !email || !password || !confirmPassword) {
+    if (!confirmPassword && password) {
+      confirmPassword = password;
+    }
+
+    if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'All fields (Name, Email, Password, Confirm Password) are required.'
+        message: 'All fields (Name, Email, Password) are required.'
       });
     }
 
