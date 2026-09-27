@@ -51,9 +51,18 @@ async function request(endpoint, options = {}) {
 
     return data;
   } catch (error) {
-    // If mobile testing on LAN (e.g. 192.168.x.x:5173), retry directly to port 5000 if proxy failed
+    const isNetworkError =
+      error.name === 'TypeError' ||
+      !error.message ||
+      error.message.includes('fetch') ||
+      error.message.includes('NetworkError') ||
+      error.message.includes('network');
+
+    // If it is a network error on mobile Wi-Fi (port 5173), retry directly to port 5000
     if (
+      isNetworkError &&
       typeof window !== 'undefined' &&
+      window.location.protocol === 'http:' &&
       window.location.port === '5173' &&
       window.location.hostname !== 'localhost' &&
       window.location.hostname !== '127.0.0.1' &&
@@ -67,15 +76,14 @@ async function request(endpoint, options = {}) {
           throw new Error(retryData.message || `Request failed with status ${retryRes.status}`);
         }
         return retryData;
-      } catch {}
+      } catch (retryErr) {
+        if (retryErr && retryErr.message && !retryErr.message.includes('fetch')) {
+          throw retryErr;
+        }
+      }
     }
 
-    if (
-      error.name === 'TypeError' ||
-      error.message.includes('fetch') ||
-      error.message.includes('NetworkError') ||
-      error.message.includes('network')
-    ) {
+    if (isNetworkError) {
       throw new Error('Connection to server failed. Please ensure the backend is running and network is connected.');
     }
     throw error;

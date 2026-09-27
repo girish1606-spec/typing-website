@@ -81,7 +81,11 @@ export function DeveloperRegisterPage() {
       toast.success(res.message || 'Developer account created successfully!');
       navigate('/developer/dashboard');
     } catch (err) {
-      setError(err.message || 'Developer registration failed. Please verify your passcode.');
+      let msg = err.message || 'Developer registration failed. Please verify your passcode.';
+      if (msg.includes('Failed to fetch') || msg.includes('network') || msg.includes('NetworkError')) {
+        msg = 'Connection to server failed. Please ensure the backend is running and network is connected.';
+      }
+      setError(msg);
     } finally {
       setLoading(false);
     }

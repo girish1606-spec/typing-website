@@ -247,40 +247,5 @@
     },
     "createdAt": "2026-09-27T12:23:52.723Z",
     "updatedAt": "2026-09-27T12:23:52.723Z"
-  },
-  {
-    "_id": "75e0ffe3-ce93-430d-b272-5a36245474b9",
-    "name": "hema",
-    "email": "hema@gmail.com",
-    "passwordHash": "$2b$10$u6R9B6v7FAV3iRd2ryxHBOwSjUaOFsAmygZJJKpEV9Qc1KqTdSlr2",
-    "role": "user",
-    "subscriptionStatus": "free",
-    "preferences": {
-      "theme": "midnight",
-      "mode": "dark",
-      "soundEnabled": true,
-      "soundType": "mechanical",
-      "soundVolume": 70,
-      "accentColor": "#38bdf8",
-      "keyShape": "rounded",
-      "keySize": "standard",
-      "keySpacing": "normal",
-      "keyAnimation": "press",
-      "keyColor": "default",
-      "borderRadius": "rounded-xl",
-      "uiDensity": "normal",
-      "animationIntensity": "normal"
-    },
-    "typingStatistics": {
-      "testsCompleted": 0,
-      "totalPracticeTime": 0,
-      "bestWpm": 0,
-      "averageWpm": 0,
-      "bestAccuracy": 0,
-      "averageAccuracy": 0,
-      "lastWpm": 0
-    },
-    "createdAt": "2026-09-27T13:00:02.527Z",
-    "updatedAt": "2026-09-27T13:00:02.527Z"
   }
 ]

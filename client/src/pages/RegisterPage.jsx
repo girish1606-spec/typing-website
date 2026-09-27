@@ -68,7 +68,11 @@ export function RegisterPage() {
       toast.success(res.message || 'Account created successfully!');
       navigate('/dashboard', { replace: true });
     } catch (err) {
-      setError(err.message || 'Something went wrong while creating your account.');
+      let msg = err.message || 'Something went wrong while creating your account.';
+      if (msg.includes('Failed to fetch') || msg.includes('network') || msg.includes('NetworkError')) {
+        msg = 'Connection to server failed. Please ensure the backend is running and network is connected.';
+      }
+      setError(msg);
     } finally {
       setSubmitting(false);
     }

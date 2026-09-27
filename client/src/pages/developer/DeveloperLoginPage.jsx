@@ -31,7 +31,11 @@ export function DeveloperLoginPage() {
       toast.success(res.message || 'Developer authenticated successfully.');
       navigate('/developer/dashboard');
     } catch (err) {
-      setError(err.message || 'Invalid developer credentials. Unauthorized access.');
+      let msg = err.message || 'Invalid developer credentials. Unauthorized access.';
+      if (msg.includes('Failed to fetch') || msg.includes('network') || msg.includes('NetworkError')) {
+        msg = 'Connection to server failed. Please ensure the backend is running and network is connected.';
+      }
+      setError(msg);
     } finally {
       setLoading(false);
     }

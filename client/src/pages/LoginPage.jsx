@@ -34,7 +34,11 @@ export function LoginPage() {
       toast.success(res.message || 'Login successful! Welcome back.');
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err.message || 'Invalid email or password.');
+      let msg = err.message || 'Invalid email or password.';
+      if (msg.includes('Failed to fetch') || msg.includes('network') || msg.includes('NetworkError')) {
+        msg = 'Connection to server failed. Please ensure the backend is running and network is connected.';
+      }
+      setError(msg);
     } finally {
       setSubmitting(false);
     }
