@@ -24,9 +24,11 @@ import {
   X,
   TrendingUp,
   Bot,
-  Gamepad2
+  Gamepad2,
+  Award
 } from 'lucide-react';
 import { Keyboard } from '../components/Keyboard.jsx';
+import { CertificateModal } from '../components/CertificateModal.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
@@ -72,6 +74,7 @@ export function PracticePage() {
   const [loadingText, setLoadingText] = useState(true);
   const [activeKey, setActiveKey] = useState('');
   const [showKeyboard, setShowKeyboard] = useState(true);
+  const [certificateOpen, setCertificateOpen] = useState(false);
 
   // Custom text modal state
   const [customModalOpen, setCustomModalOpen] = useState(false);
@@ -872,27 +875,51 @@ export function PracticePage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3">
+              <div className="space-y-2.5">
                 <button
-                  onClick={() => resetTest(selectedMode, selectedCategory)}
-                  className="flex-1 py-3 px-4 rounded-xl font-bold text-white bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-xs flex items-center justify-center gap-2 shadow-lg shadow-sky-500/25"
+                  onClick={() => setCertificateOpen(true)}
+                  className="w-full py-3 px-4 rounded-xl font-bold text-slate-950 bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 font-mono uppercase tracking-wider"
                 >
-                  <RotateCcw className="w-4 h-4" />
-                  TRY AGAIN
+                  <Award className="w-4 h-4" />
+                  GENERATE OFFICIAL CERTIFICATE
                 </button>
 
-                <button
-                  onClick={() => navigate('/dashboard')}
-                  className="flex-1 py-3 px-4 rounded-xl font-semibold text-slate-200 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs flex items-center justify-center gap-2"
-                >
-                  <Home className="w-4 h-4" />
-                  BACK TO DASHBOARD
-                </button>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={() => resetTest(selectedMode, selectedCategory)}
+                    className="flex-1 py-3 px-4 rounded-xl font-bold text-white bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-xs flex items-center justify-center gap-2 shadow-lg shadow-sky-500/25"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    TRY AGAIN
+                  </button>
+
+                  <button
+                    onClick={() => navigate('/dashboard')}
+                    className="flex-1 py-3 px-4 rounded-xl font-semibold text-slate-200 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs flex items-center justify-center gap-2"
+                  >
+                    <Home className="w-4 h-4" />
+                    BACK TO DASHBOARD
+                  </button>
+                </div>
               </div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
+
+      {/* Official Certificate Modal */}
+      {finalResult && (
+        <CertificateModal
+          isOpen={certificateOpen}
+          onClose={() => setCertificateOpen(false)}
+          userName={user?.name || 'Speed Typist'}
+          wpm={finalResult.wpm}
+          accuracy={finalResult.accuracy}
+          duration={finalResult.duration}
+          mode={finalResult.mode}
+          rating={finalResult.rating}
+        />
+      )}
     </div>
   );
 }

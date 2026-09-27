@@ -13,16 +13,19 @@ import {
   TrendingUp,
   CheckCircle2,
   AlertCircle,
-  RotateCcw
+  RotateCcw,
+  Award
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { api } from '../services/api.js';
+import { CertificateModal } from '../components/CertificateModal.jsx';
 
 export function DashboardPage() {
   const { user, isPremium, isSubscriptionPending, refreshProfile } = useAuth();
   const [stats, setStats] = useState(null);
   const [recentTests, setRecentTests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [certModalOpen, setCertModalOpen] = useState(false);
 
   useEffect(() => {
     async function loadStats() {
@@ -139,6 +142,16 @@ export function DashboardPage() {
             <Play className="w-4 h-4 fill-white" />
             START PRACTICE
           </Link>
+
+          {stats && stats.testsCompleted > 0 && (
+            <button
+              onClick={() => setCertModalOpen(true)}
+              className="inline-flex items-center gap-2 px-5 py-3.5 rounded-2xl font-bold text-amber-300 bg-amber-950/40 border border-amber-500/40 hover:bg-amber-900/50 hover:border-amber-400 text-sm transition-all shadow-md shadow-amber-500/10 font-mono uppercase tracking-wider"
+            >
+              <Award className="w-4 h-4 text-amber-400" />
+              View Certificate
+            </button>
+          )}
 
           {!isPremium && (
             <Link
@@ -345,6 +358,28 @@ export function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* Official Certificate Modal */}
+      {stats && (
+        <CertificateModal
+          isOpen={certModalOpen}
+          onClose={() => setCertModalOpen(false)}
+          userName={user?.name || 'Speed Typist'}
+          wpm={stats.bestWpm || 0}
+          accuracy={stats.bestAccuracy || 100}
+          duration={60}
+          mode="Personal Record"
+          rating={
+            (stats.bestWpm || 0) >= 100
+              ? 'Typing Grandmaster'
+              : (stats.bestWpm || 0) >= 80
+              ? 'Lightning Demon'
+              : (stats.bestWpm || 0) >= 60
+              ? 'Pro Typist'
+              : 'Agile Speedster'
+          }
+        />
+      )}
     </div>
   );
 }

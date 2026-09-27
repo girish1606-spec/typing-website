@@ -20,6 +20,7 @@ export function Footer() {
 
         <div className="flex flex-wrap items-center justify-center gap-6 text-xs sm:text-sm">
           <Link to="/practice" className="hover:text-sky-400 transition-colors">Typing Practice</Link>
+          <Link to="/multiplayer" className="hover:text-sky-400 transition-colors">Race Arena</Link>
           <Link to="/leaderboard" className="hover:text-sky-400 transition-colors">Leaderboard</Link>
           <Link to="/subscription" className="hover:text-sky-400 transition-colors">Premium ₹1</Link>
           <Link to="/settings" className="hover:text-sky-400 transition-colors">Settings</Link>

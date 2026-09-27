@@ -40,6 +40,7 @@ export function Navbar() {
   const navLinks = [
     { label: 'Home', path: '/' },
     { label: 'Practice', path: '/practice', highlight: true },
+    { label: 'Race Arena', path: '/multiplayer' },
     { label: 'Leaderboard', path: '/leaderboard' },
     { label: 'Subscription', path: '/subscription' },
     ...(isAuthenticated ? [
