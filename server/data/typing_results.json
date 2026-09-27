@@ -46,5 +46,21 @@
     "textSnippet": "",
     "createdAt": "2026-09-27T12:23:52.352Z",
     "updatedAt": "2026-09-27T12:23:52.352Z"
+  },
+  {
+    "_id": "70379fc1-9e53-42db-8c19-85a22c9eb144",
+    "userId": "guest",
+    "wpm": 26,
+    "rawWpm": 26,
+    "accuracy": 95,
+    "errors": 6,
+    "correctChars": 0,
+    "incorrectChars": 0,
+    "totalChars": 0,
+    "duration": 56,
+    "mode": "quick",
+    "textSnippet": "",
+    "createdAt": "2026-09-27T12:56:58.435Z",
+    "updatedAt": "2026-09-27T12:56:58.435Z"
   }
 ]
