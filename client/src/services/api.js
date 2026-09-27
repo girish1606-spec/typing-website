@@ -57,6 +57,10 @@ export const api = {
     return request(`/typing/texts?${params.toString()}`, { method: 'GET' });
   },
   saveTypingResult: (payload) => request('/typing/results', { method: 'POST', body: payload }),
+  getLeaderboard: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/typing/leaderboard${query ? `?${query}` : ''}`, { method: 'GET' });
+  },
 
   // Payments
   getPaymentConfig: () => request('/payments/config', { method: 'GET' }),

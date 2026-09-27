@@ -22,7 +22,9 @@ import {
   Type,
   FileText,
   X,
-  TrendingUp
+  TrendingUp,
+  Bot,
+  Gamepad2
 } from 'lucide-react';
 import { Keyboard } from '../components/Keyboard.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -47,6 +49,15 @@ const CATEGORIES = [
   { id: 'custom', label: 'Custom Text', icon: <SlidersHorizontal className="w-3.5 h-3.5" /> },
 ];
 
+const PACE_BOT_OPTIONS = [
+  { wpm: 0, label: 'Bot Off' },
+  { wpm: 40, label: '40 WPM' },
+  { wpm: 60, label: '60 WPM' },
+  { wpm: 80, label: '80 WPM' },
+  { wpm: 100, label: '100 WPM' },
+  { wpm: 120, label: '120 WPM' },
+];
+
 export function PracticePage() {
   const { user, isPremium } = useAuth();
   const { settings, updateSetting } = useTheme();
@@ -56,6 +67,7 @@ export function PracticePage() {
   // Test state
   const [selectedMode, setSelectedMode] = useState('1min');
   const [selectedCategory, setSelectedCategory] = useState('standard');
+  const [paceBotWpm, setPaceBotWpm] = useState(0);
   const [targetText, setTargetText] = useState('');
   const [loadingText, setLoadingText] = useState(true);
   const [activeKey, setActiveKey] = useState('');
@@ -171,6 +183,8 @@ export function PracticePage() {
       rating,
       textSnippet: targetText.slice(0, 80),
       timeline: wpmHistory,
+      paceBotWpm,
+      beatBot: paceBotWpm > 0 ? finalWpm >= paceBotWpm : null,
     };
 
     setFinalResult(resultPayload);
@@ -335,6 +349,10 @@ export function PracticePage() {
   };
 
   const progressPercent = targetText.length > 0 ? Math.min(100, Math.round((currentIndex / targetText.length) * 100)) : 0;
+  const botCharsTyped = paceBotWpm > 0 && isStarted ? Math.min(targetText.length, Math.floor((paceBotWpm * 5 / 60) * elapsedSeconds)) : 0;
+  const botProgressPercent = targetText.length > 0 ? Math.min(100, Math.round((botCharsTyped / targetText.length) * 100)) : 0;
+  const deltaChars = currentIndex - botCharsTyped;
+  const deltaWords = Math.round(deltaChars / 5);
   const targetChar = targetText[currentIndex] || '';
 
   return (
@@ -387,6 +405,27 @@ export function PracticePage() {
               <span>{cat.label}</span>
             </button>
           ))}
+        </div>
+
+        {/* Pace Bot / Ghost Racer Selector */}
+        <div className="flex items-center gap-1.5 border-t md:border-t-0 md:border-l border-slate-800 pt-2 md:pt-0 md:pl-4">
+          <Bot className="w-4 h-4 text-purple-400 shrink-0" />
+          <span className="text-[11px] font-mono text-slate-400 hidden xl:inline">Ghost Bot:</span>
+          <select
+            value={paceBotWpm}
+            onChange={(e) => {
+              setPaceBotWpm(Number(e.target.value));
+              resetTest(selectedMode, selectedCategory);
+            }}
+            className="bg-slate-900 border border-slate-700 text-purple-300 text-xs rounded-xl px-2 py-1 focus:outline-none focus:border-purple-400 font-mono font-medium"
+            title="Practice against a target Pace Bot"
+          >
+            {PACE_BOT_OPTIONS.map((opt) => (
+              <option key={opt.wpm} value={opt.wpm}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Sound, Keyboard & Restart Quick Toggles */}
@@ -484,15 +523,58 @@ export function PracticePage() {
         </div>
       </div>
 
-      {/* Progress Bar Line */}
-      <div className="w-full h-1.5 rounded-full bg-slate-800/80 overflow-hidden -mt-2">
-        <motion.div
-          className="h-full bg-gradient-to-r from-sky-400 to-indigo-500"
-          initial={{ width: 0 }}
-          animate={{ width: `${progressPercent}%` }}
-          transition={{ duration: 0.1 }}
-        />
-      </div>
+      {/* Race Track / Progress Bar */}
+      {paceBotWpm > 0 ? (
+        <div className="p-4 rounded-2xl bg-slate-950/80 border border-purple-500/30 shadow-lg space-y-3 -mt-2">
+          <div className="flex items-center justify-between text-xs font-mono">
+            <div className="flex items-center gap-2">
+              <span className="text-sky-400 font-bold">🏎️ You ({wpm} WPM)</span>
+              <span className="text-slate-600">&bull;</span>
+              <span className="text-purple-400 font-bold">🤖 Ghost Bot ({paceBotWpm} WPM)</span>
+            </div>
+            {isStarted && (
+              <div className="text-[11px]">
+                {deltaChars >= 0 ? (
+                  <span className="text-emerald-400 font-bold">+{Math.max(1, deltaWords)} words ahead ⚡</span>
+                ) : (
+                  <span className="text-rose-400 font-bold">-{Math.abs(deltaWords)} words behind ⚠️</span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* User Track */}
+          <div className="space-y-1">
+            <div className="w-full h-2 rounded-full bg-slate-800/80 overflow-hidden relative">
+              <motion.div
+                className="h-full bg-gradient-to-r from-sky-400 to-teal-400"
+                style={{ width: `${progressPercent}%` }}
+                transition={{ duration: 0.1 }}
+              />
+            </div>
+          </div>
+
+          {/* Ghost Bot Track */}
+          <div className="space-y-1">
+            <div className="w-full h-2 rounded-full bg-slate-800/80 overflow-hidden relative">
+              <motion.div
+                className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
+                style={{ width: `${botProgressPercent}%` }}
+                transition={{ duration: 0.1 }}
+              />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="w-full h-1.5 rounded-full bg-slate-800/80 overflow-hidden -mt-2">
+          <motion.div
+            className="h-full bg-gradient-to-r from-sky-400 to-indigo-500"
+            initial={{ width: 0 }}
+            animate={{ width: `${progressPercent}%` }}
+            transition={{ duration: 0.1 }}
+          />
+        </div>
+      )}
 
       {/* Interactive Typing Container */}
       <div
@@ -669,7 +751,7 @@ export function PracticePage() {
               </div>
 
               {/* Core Result Cards */}
-              <div className="grid grid-cols-2 gap-4 mb-5">
+              <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 text-center">
                   <span className="text-xs font-semibold text-slate-400 uppercase">Speed</span>
                   <div className="text-4xl font-black text-sky-400 font-mono my-1">
@@ -686,6 +768,35 @@ export function PracticePage() {
                   <span className="text-[11px] text-slate-500 font-mono">Precision Rate</span>
                 </div>
               </div>
+
+              {/* Pace Bot Duel Outcome */}
+              {finalResult.paceBotWpm > 0 && (
+                <div
+                  className={`p-3.5 rounded-2xl mb-4 border text-center font-mono text-xs ${
+                    finalResult.beatBot
+                      ? 'bg-emerald-950/70 border-emerald-500/50 text-emerald-300'
+                      : 'bg-purple-950/70 border-purple-500/50 text-purple-300'
+                  }`}
+                >
+                  {finalResult.beatBot ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-base">🏆</span>
+                      <span>
+                        <strong>VICTORY!</strong> You outpaced the {finalResult.paceBotWpm} WPM Ghost Bot by{' '}
+                        <strong className="text-emerald-400">+{finalResult.wpm - finalResult.paceBotWpm} WPM</strong>!
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-base">🤖</span>
+                      <span>
+                        The {finalResult.paceBotWpm} WPM Ghost Bot took the lead by{' '}
+                        <strong className="text-rose-400">{finalResult.paceBotWpm - finalResult.wpm} WPM</strong>. Try again!
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* SVG Speed Timeline Chart */}
               {wpmHistory.length > 2 && (

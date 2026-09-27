@@ -1,5 +1,5 @@
 import express from 'express';
-import { getTypingTexts, saveTypingResult } from '../controllers/typingController.js';
+import { getTypingTexts, saveTypingResult, getLeaderboard } from '../controllers/typingController.js';
 import { verifyToken } from '../utils/tokens.js';
 import { User } from '../models/dbStore.js';
 
@@ -26,6 +26,7 @@ async function optionalAuth(req, res, next) {
 }
 
 router.get('/texts', getTypingTexts);
+router.get('/leaderboard', getLeaderboard);
 router.post('/results', optionalAuth, saveTypingResult);
 
 export default router;

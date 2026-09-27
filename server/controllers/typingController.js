@@ -177,3 +177,86 @@ export async function getTypingTexts(req, res) {
     });
   }
 }
+
+/**
+ * Get global leaderboard rankings
+ * Supports ?mode=all|quick|1min|3min|5min
+ */
+export async function getLeaderboard(req, res) {
+  try {
+    const { mode = 'all', limit = 50 } = req.query;
+
+    let leaderboard = [];
+
+    if (mode === 'all') {
+      const allUsers = await User.find();
+      const activeTypists = allUsers
+        .filter(u => u.typingStatistics && u.typingStatistics.testsCompleted > 0)
+        .map(u => ({
+          userId: u._id,
+          name: u.name,
+          role: u.role,
+          subscriptionStatus: u.subscriptionStatus,
+          bestWpm: u.typingStatistics?.bestWpm || 0,
+          averageWpm: u.typingStatistics?.averageWpm || 0,
+          bestAccuracy: u.typingStatistics?.bestAccuracy || 0,
+          testsCompleted: u.typingStatistics?.testsCompleted || 0,
+          totalPracticeTime: u.typingStatistics?.totalPracticeTime || 0,
+          lastWpm: u.typingStatistics?.lastWpm || 0,
+          avatarTheme: u.preferences?.theme || 'midnight'
+        }))
+        .sort((a, b) => {
+          if (b.bestWpm !== a.bestWpm) return b.bestWpm - a.bestWpm;
+          return b.bestAccuracy - a.bestAccuracy;
+        });
+
+      leaderboard = activeTypists.slice(0, parseInt(limit, 10));
+    } else {
+      const results = await TypingResult.find({ mode });
+      const userBest = new Map();
+      for (const r of results) {
+        const id = r.userId;
+        const current = userBest.get(id);
+        if (!current || r.wpm > current.bestWpm) {
+          userBest.set(id, {
+            userId: r.userId,
+            name: r.userName || 'Anonymous Typist',
+            bestWpm: r.wpm,
+            bestAccuracy: r.accuracy,
+            mode: r.mode,
+            createdAt: r.createdAt
+          });
+        }
+      }
+      leaderboard = Array.from(userBest.values())
+        .sort((a, b) => b.bestWpm - a.bestWpm)
+        .slice(0, parseInt(limit, 10));
+    }
+
+    const rankedLeaderboard = leaderboard.map((item, index) => ({
+      rank: index + 1,
+      ...item
+    }));
+
+    const topThree = {
+      gold: rankedLeaderboard[0] || null,
+      silver: rankedLeaderboard[1] || null,
+      bronze: rankedLeaderboard[2] || null,
+    };
+
+    return res.status(200).json({
+      success: true,
+      mode,
+      topThree,
+      rankings: rankedLeaderboard,
+      totalParticipants: rankedLeaderboard.length
+    });
+  } catch (error) {
+    console.error('getLeaderboard error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve leaderboard rankings.'
+    });
+  }
+}
+

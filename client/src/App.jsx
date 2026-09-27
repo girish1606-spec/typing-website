@@ -24,6 +24,7 @@ import { PaymentPage } from './pages/PaymentPage.jsx';
 import { UserPaymentsPage } from './pages/UserPaymentsPage.jsx';
 import { SettingsPage } from './pages/SettingsPage.jsx';
 import { ProfilePage } from './pages/ProfilePage.jsx';
+import { LeaderboardPage } from './pages/LeaderboardPage.jsx';
 
 // Developer Pages
 import { DeveloperLoginPage } from './pages/developer/DeveloperLoginPage.jsx';
@@ -47,6 +48,7 @@ export default function App() {
                   <Route path="/register" element={<RegisterPage />} />
                   <Route path="/forgot" element={<ForgotPage />} />
                   <Route path="/practice" element={<PracticePage />} />
+                  <Route path="/leaderboard" element={<LeaderboardPage />} />
                   <Route path="/subscription" element={<SubscriptionPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
 
