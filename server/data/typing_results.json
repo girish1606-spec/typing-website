@@ -1,0 +1,50 @@
+[
+  {
+    "_id": "6f3d2b19-db40-42a2-ae55-5bfd7e0b3dd5",
+    "userId": "5a265009-317e-4834-992d-d7becb18c4be",
+    "wpm": 88,
+    "rawWpm": 92,
+    "accuracy": 98.5,
+    "errors": 2,
+    "correctChars": 440,
+    "incorrectChars": 2,
+    "totalChars": 442,
+    "duration": 60,
+    "mode": "1min",
+    "textSnippet": "Typing at high speeds requires a synthesis of rela",
+    "createdAt": "2026-09-27T05:45:54.498Z",
+    "updatedAt": "2026-09-27T05:45:54.498Z"
+  },
+  {
+    "_id": "cc13fa5b-e065-4df1-b45e-ab6e11cc4ce1",
+    "userId": "6ac4923f-80c4-4339-957a-85764c3b8ad6",
+    "wpm": 94,
+    "rawWpm": 94,
+    "accuracy": 98.4,
+    "errors": 2,
+    "correctChars": 0,
+    "incorrectChars": 0,
+    "totalChars": 0,
+    "duration": 60,
+    "mode": "1min",
+    "textSnippet": "",
+    "createdAt": "2026-09-27T12:23:03.489Z",
+    "updatedAt": "2026-09-27T12:23:03.489Z"
+  },
+  {
+    "_id": "51336896-2f33-4f1b-b03b-c0b3f049f477",
+    "userId": "0e2c15f7-3bdf-43d9-ac84-0d36b4415dad",
+    "wpm": 94,
+    "rawWpm": 94,
+    "accuracy": 98.4,
+    "errors": 2,
+    "correctChars": 0,
+    "incorrectChars": 0,
+    "totalChars": 0,
+    "duration": 60,
+    "mode": "1min",
+    "textSnippet": "",
+    "createdAt": "2026-09-27T12:23:52.352Z",
+    "updatedAt": "2026-09-27T12:23:52.352Z"
+  }
+]

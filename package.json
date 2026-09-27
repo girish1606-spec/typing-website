@@ -1,0 +1,29 @@
+{
+  "name": "type-speed",
+  "version": "1.0.0",
+  "description": "Production-Ready Typing Practice Platform — TYPE SPEED",
+  "private": true,
+  "scripts": {
+    "server": "npm --prefix server start",
+    "server:dev": "npm --prefix server run dev",
+    "client": "npm --prefix client run dev",
+    "client:build": "npm --prefix client run build",
+    "build": "npm --prefix client run build",
+    "install:all": "npm.cmd --prefix server install; npm.cmd --prefix client install"
+  },
+  "keywords": [
+    "typing",
+    "wpm",
+    "accuracy",
+    "practice",
+    "fullstack",
+    "react",
+    "vite",
+    "tailwind",
+    "framer-motion",
+    "express",
+    "mongodb"
+  ],
+  "author": "TYPE SPEED Engineering Team",
+  "license": "MIT"
+}
