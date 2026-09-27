@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000/api' : '/api');
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 /**
  * Universal API request wrapper
@@ -30,6 +30,9 @@ async function request(endpoint, options = {}) {
 
     return data;
   } catch (error) {
+    if (error.name === 'TypeError' || error.message.includes('fetch') || error.message.includes('NetworkError')) {
+      throw new Error('Unable to connect to TYPE SPEED server. Please ensure the backend is running.');
+    }
     throw error;
   }
 }

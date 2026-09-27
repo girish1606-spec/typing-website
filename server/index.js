@@ -33,20 +33,14 @@ app.use(helmet({
 }));
 
 const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow local development ports or specified origin
-    if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1') || origin === APP_ORIGIN) {
-      callback(null, true);
-    } else {
-      callback(null, true); // Permissive in dev, lockable in prod
-    }
-  },
+  origin: true, // Allow all origins and reflect origin for credentials
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 };
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -109,9 +103,9 @@ app.use((err, req, res, next) => {
 async function startServer() {
   try {
     await initDatabase();
-    app.listen(PORT, () => {
-      console.log(`🚀 TYPE SPEED Backend Server is running at http://localhost:${PORT}`);
-      console.log(`🔐 Developer portal API available at http://localhost:${PORT}/api/developer`);
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 TYPE SPEED Backend Server is running at http://0.0.0.0:${PORT}`);
+      console.log(`🔐 Developer portal API available at http://0.0.0.0:${PORT}/api/developer`);
     });
   } catch (error) {
     console.error('Fatal server boot error:', error);
